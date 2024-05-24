@@ -3,6 +3,7 @@ import win32process
 import psutil
 import time
 
+time_dict = {}
 def get_focused_window_info():
     try:
             
@@ -55,14 +56,13 @@ def format_data(data):
     return title
 
 
-if __name__ == "__main__":
+def start_monitoring():
     try:
-        time_dict = {}
         while True:
             focused_window_info = get_focused_window_info()
             title = format_data(focused_window_info)
             print(f"Focused Window Info: {title}")
-            time.sleep(1)  # Wait for 1 second before updating
+            time.sleep(1)
     except KeyboardInterrupt:
         for key in time_dict:
             print(f'{key}: {time_dict[key]} seconds')
