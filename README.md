@@ -32,6 +32,6 @@
 ## Database Schema
 The SQLite database contains a single table window_time with the following schema:
 
-id (INTEGER PRIMARY KEY): Unique identifier for each record.
-title (TEXT): The title of the window.
-time_spent (INTEGER): The time spent on the window in seconds.
+- `id` (INTEGER PRIMARY KEY): Unique identifier for each record.
+- `title` (TEXT): The title of the window.
+- `time_spent` (INTEGER): The time spent on the window in seconds.
