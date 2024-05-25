@@ -13,8 +13,7 @@
 
 1. Clone the repository:
 
-   `git clone https://github.com/yourusername/screentime-tracker.git`
-   `cd screentime-tracker`
+   `git clone https://github.com/mazarskov/ScreenTime.git`
 
 2. Install the required Python packages:
 
