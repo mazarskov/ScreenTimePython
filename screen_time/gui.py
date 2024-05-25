@@ -3,7 +3,8 @@ import tkinter as tk
 from tkinter import scrolledtext
 import threading
 import time
-from screen_time.winapi import get_focused_window_info, format_data, time_dict
+from winapi import get_focused_window_info, format_data, time_dict
+from db_commands import add_to_db
 
 class ScreenTimeApp:
     def __init__(self, root):
@@ -22,6 +23,8 @@ class ScreenTimeApp:
         self.is_monitoring = False
         self.monitoring_thread = None
 
+        self.root.protocol("WM_DELETE_WINDOW", self.exit_app)
+
         self.start_monitoring()  # Start tracking as soon as the app opens
 
     def start_monitoring(self):
@@ -38,6 +41,7 @@ class ScreenTimeApp:
 
     
     def exit_app(self):
+        add_to_db(time_dict)
         self.stop_monitoring()
         self.root.quit()
 

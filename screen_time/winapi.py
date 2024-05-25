@@ -2,8 +2,18 @@ import win32gui
 import win32process
 import psutil
 import time
-
+from db_commands import read_from_db
 time_dict = {}
+
+
+try:
+    listo = read_from_db()
+    for entry in listo:
+        time_dict[entry[0]] = entry[1]
+except Exception as e:
+    time_dict = {}
+    print(e)
+
 def get_focused_window_info():
     try:
             
@@ -56,6 +66,7 @@ def format_data(data):
     return title
 
 
+"""
 def start_monitoring():
     try:
         while True:
@@ -67,3 +78,4 @@ def start_monitoring():
         for key in time_dict:
             print(f'{key}: {time_dict[key]} seconds')
         print("Exiting the program.")
+"""
