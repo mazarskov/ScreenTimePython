@@ -6,7 +6,9 @@ setup(
     packages=find_packages(),
     install_requires=[
         "psutil",
-        "pywin32"
+        "pywin32",
+        "tkinter",
+        "sqlite3"
     ],
     entry_points={
         "console_scripts": [
