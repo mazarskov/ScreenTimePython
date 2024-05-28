@@ -36,11 +36,31 @@ def get_focused_window_info():
         except psutil.NoSuchProcess:
             process_name = None
 
-        if process_name == "explorer.exe" and window_title == "":
-            window_title = "Desktop"
+        SYSTEM_PROCESS_NAMES = [
+            "explorer.exe",  # Handles multiple system utilities
+            "SearchUI.exe",  # Windows Search
+            "SystemSettings.exe",  # Windows Settings
+            "ShellExperienceHost.exe",  # Start Menu, etc.
+            "dwm.exe",  # Desktop Window Manager
+            "sihost.exe",  # Shell Infrastructure Host
+            "ctfmon.exe",  # CTF Loader
+            "Taskmgr.exe",  # Task Manager
+            "LockApp.exe",
+            "SearchHost.exe" 
+            # Add more process names as needed
+]
 
-        if window_title == "Program Manager" and process_name == "explorer.exe":
-            window_title = "Desktop"
+        # List of known system window titles
+        SYSTEM_WINDOW_TITLES = [
+            "",  # Many system utilities have empty titles
+            "Program Manager",  # Desktop
+            "Notification Center",  # Notifications
+            "Volume Control",  # Volume Tray
+            # Add more titles as needed
+]
+        if window_title in SYSTEM_WINDOW_TITLES or process_name in SYSTEM_PROCESS_NAMES:
+            window_title = "Useless"
+            process_name = "Useless"
     
         return {
             "window_title": window_title,

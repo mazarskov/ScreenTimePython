@@ -1,0 +1,14 @@
+msgid "Home"
+msgstr "Домой"
+
+msgid "Other"
+msgstr "Другое"
+
+msgid "Settings"
+msgstr "Настройки"
+
+msgid "Exit"
+msgstr "Выход"
+
+msgid "ScreenTime"
+msgstr "Экранное время"
