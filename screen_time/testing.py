@@ -1,9 +1,11 @@
+from datetime import datetime
 import tkinter as tk
 from tkinter import scrolledtext
 import threading
 import time
-from winapi import get_focused_window_info, format_data, time_dict
+from winapi import get_focused_window_info, format_data, time_dict, populate_dict
 from db_commands import add_to_db
+from current_time import get_current_time
 
 class ScreenTimeApp(tk.Tk):
     def __init__(self):
@@ -35,6 +37,7 @@ class ScreenTimeApp(tk.Tk):
 
         self.show_frame("HomePage")
 
+        self.last_date = get_current_time()
         self.protocol("WM_DELETE_WINDOW", self.exit_app)
 
         # Start monitoring as soon as the app opens
@@ -71,12 +74,18 @@ class ScreenTimeApp(tk.Tk):
                 self.monitoring_thread.join()
 
     def exit_app(self):
-        add_to_db(time_dict)
+        add_to_db(time_dict, get_current_time())
         self.stop_monitoring()
         self.quit()
 
     def monitor(self):
         while self.is_monitoring:
+            current_date = get_current_time()
+            if current_date != self.last_date:
+                add_to_db(time_dict, self.last_date)
+                time_dict.clear()
+                populate_dict(time_dict)
+                self.last_date = current_date
             focused_window_info = get_focused_window_info()
             format_data(focused_window_info)
             self.update_text_area()
@@ -107,7 +116,10 @@ class HomePage(tk.Frame):
         self.text_area.config(state=tk.NORMAL)
         self.text_area.delete(1.0, tk.END)  # Clear the text area
         for key in time_dict:
-            self.text_area.insert(tk.END, f'{key}: {time_dict[key]} seconds\n')
+            if key == "Unknown(Unknown)":
+                continue
+            else:
+                self.text_area.insert(tk.END, f'{key}: {time_dict[key]} seconds\n')
         self.text_area.config(state=tk.DISABLED)
         self.text_area.see(tk.END)  # Scroll to the end of the text area
 

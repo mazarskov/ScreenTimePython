@@ -2,17 +2,27 @@ import win32gui
 import win32process
 import psutil
 import time
-from db_commands import read_from_db
+from db_commands import read_from_db, read_from_db_date
+from datetime import datetime
+from current_time import get_current_time
+
+
+current_date = get_current_time()
+#current_date = "31-05-2024"
 time_dict = {}
+def populate_dict(time_dict):
+    try:
+        listo = read_from_db_date(current_date)
 
+        for entry in listo:
+            time_dict[entry[0]] = entry[1]
+        return time_dict
+    except Exception as e:
+        time_dict = {}
+        print(e)
+        return time_dict
 
-try:
-    listo = read_from_db()
-    for entry in listo:
-        time_dict[entry[0]] = entry[1]
-except Exception as e:
-    time_dict = {}
-    print(e)
+time_dict = populate_dict(time_dict)
 
 def get_focused_window_info():
     try:
@@ -59,8 +69,8 @@ def get_focused_window_info():
             # Add more titles as needed
 ]
         if window_title in SYSTEM_WINDOW_TITLES or process_name in SYSTEM_PROCESS_NAMES:
-            window_title = "Useless"
-            process_name = "Useless"
+            window_title = "Unknown"
+            process_name = "Unknown"
     
         return {
             "window_title": window_title,

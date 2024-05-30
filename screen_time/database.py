@@ -14,7 +14,8 @@ def create_table(conn):
     CREATE TABLE IF NOT EXISTS window_time (
         id INTEGER PRIMARY KEY,
         title TEXT,
-        time_spent INTEGER
+        time_spent INTEGER,
+        date TEXT
     )
     """
     try:
