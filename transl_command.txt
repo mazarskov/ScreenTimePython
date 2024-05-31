@@ -1,0 +1,1 @@
+msgfmt locales/ru/LC_MESSAGES/myapp.po -o locales/ru/LC_MESSAGES/myapp.mo

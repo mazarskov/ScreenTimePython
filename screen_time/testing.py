@@ -6,7 +6,14 @@ import time
 from winapi import get_focused_window_info, format_data, time_dict, populate_dict
 from db_commands import add_to_db
 from current_time import get_current_time
+import gettext
+import os
 
+
+localedir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'locales')
+gettext.bindtextdomain('myapp', localedir)
+gettext.textdomain('myapp')
+_ = gettext.gettext
 class ScreenTimeApp(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -47,13 +54,13 @@ class ScreenTimeApp(tk.Tk):
         navbar = tk.Frame(self, bg="lightgrey")
         navbar.pack(side="top", fill="x")
 
-        home_button = tk.Button(navbar, text="Home", command=lambda: self.show_frame("HomePage"))
+        home_button = tk.Button(navbar, text=(_("Home")), command=lambda: self.show_frame("HomePage"))
         home_button.pack(side="left", padx=10, pady=10)
 
-        other_button = tk.Button(navbar, text="Other", command=lambda: self.show_frame("OtherPage"))
+        other_button = tk.Button(navbar, text=(_("Other")), command=lambda: self.show_frame("OtherPage"))
         other_button.pack(side="left", padx=10, pady=10)
 
-        settings_button = tk.Button(navbar, text="Settings", command=lambda: self.show_frame("SettingsPage"))
+        settings_button = tk.Button(navbar, text=(_("Settings")), command=lambda: self.show_frame("SettingsPage"))
         settings_button.pack(side="left", padx=10, pady=10)
 
     def show_frame(self, page_name):
@@ -104,7 +111,7 @@ class HomePage(tk.Frame):
         self.text_area.pack(padx=10, pady=10)
         self.text_area.config(state=tk.DISABLED) 
 
-        self.start_button = tk.Button(self, text="Start", command=controller.start_monitoring, state=tk.DISABLED)
+        self.start_button = tk.Button(self, text=(_("Start")), command=controller.start_monitoring, state=tk.DISABLED)
         self.start_button.pack(pady=5)
 
         self.stop_button = tk.Button(self, text="Exit", command=controller.exit_app)
@@ -137,6 +144,17 @@ class SettingsPage(tk.Frame):
         label = tk.Label(self, text="This is the settings page")
         label.pack(pady=10, padx=10)
 
+def set_language(lang):
+    try:
+        lang_translation = gettext.translation('myapp', '.\locales', languages=[lang], fallback=True)
+    except FileNotFoundError:
+        print(f"Translation files for '{lang}' not found. Falling back to default language.")
+        lang_translation = gettext.translation('myapp', '.\locales', languages=['en'], fallback=True)
+    lang_translation.install()
+    global _
+    _ = lang_translation.gettext
+
 if __name__ == "__main__":
+    set_language('en')
     app = ScreenTimeApp()
     app.mainloop()
