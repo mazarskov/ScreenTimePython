@@ -23,6 +23,8 @@ def add_to_db(data, date):
     try:
         cursor = conn.cursor()
         for title, time_spent in data.items():
+            if title == 'Unknown(Unknown)':
+                continue
             cursor.execute("SELECT * FROM window_time WHERE (title) = (?) AND (date) = (?);", (title,current_date))
             rows = cursor.fetchall()
             if rows != []:
