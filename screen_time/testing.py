@@ -1,19 +1,22 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import tkinter as tk
+from tkinter import ttk
 from tkinter import scrolledtext
 import threading
 import time
 from winapi import get_focused_window_info, format_data, time_dict, populate_dict
-from db_commands import add_to_db
+from db_commands import add_to_db, read_from_db_date
 from current_time import get_current_time
 import gettext
 import os
+from config import get_language
 
 
 localedir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'locales')
 gettext.bindtextdomain('myapp', localedir)
 gettext.textdomain('myapp')
 _ = gettext.gettext
+language = get_language()
 class ScreenTimeApp(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -130,12 +133,82 @@ class HomePage(tk.Frame):
         self.text_area.config(state=tk.DISABLED)
         self.text_area.see(tk.END)  # Scroll to the end of the text area
 
+class WeeklyCalendarApp:
+    def __init__(self, root):
+        self.root = root
+        self.current_date = datetime.today().date()
+
+        self.create_widgets()
+        self.show_week()
+
+    def create_widgets(self):
+        self.calendar_frame = ttk.Frame(self.root)
+        self.calendar_frame.pack(padx=10, pady=10)
+
+        self.scrollbar = ttk.Scrollbar(self.calendar_frame, orient="horizontal")
+        self.scrollbar.grid(row=1, column=0, sticky="ew")
+
+        self.calendar_canvas = tk.Canvas(self.calendar_frame, xscrollcommand=self.scrollbar.set)
+        self.calendar_canvas.grid(row=0, column=0, sticky="nsew")
+
+        self.scrollbar.config(command=self.calendar_canvas.xview)
+
+        self.calendar_frame.grid_rowconfigure(0, weight=1)
+        self.calendar_frame.grid_columnconfigure(0, weight=1)
+
+        self.prev_week_button = ttk.Button(self.calendar_frame, text="◀", command=self.prev_week)
+        self.prev_week_button.grid(row=2, column=0, padx=5, pady=5)
+
+        self.next_week_button = ttk.Button(self.calendar_frame, text="▶", command=self.next_week)
+        self.next_week_button.grid(row=2, column=1, padx=5, pady=5)
+
+        self.week_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+        self.day_labels = []
+        for i, day in enumerate(self.week_days):
+            label = ttk.Label(self.calendar_canvas, text=day, borderwidth=1, relief="solid")
+            label.grid(row=0, column=i, sticky="nsew")
+            label.bind("<Button-1>", lambda event, day=self.current_date - timedelta(days=self.current_date.weekday()) + timedelta(days=i): self.on_day_click(day))
+            self.day_labels.append(label)
+
+        self.calendar_canvas.update_idletasks()
+        self.canvas_width = sum(label.winfo_width() for label in self.day_labels)
+        self.canvas_height = self.day_labels[0].winfo_height()
+        self.calendar_canvas.config(scrollregion=(0, 0, self.canvas_width, self.canvas_height))
+
+    def show_week(self):
+        start_of_week = self.current_date - timedelta(days=self.current_date.weekday())
+        for i, day_label in enumerate(self.day_labels):
+            day = start_of_week + timedelta(days=i)
+            day_label.config(text=day.strftime("%A\n%d-%m-%Y"))
+
+    def prev_week(self):
+        self.current_date -= timedelta(days=7)
+        self.show_week()
+
+    def next_week(self):
+        self.current_date += timedelta(days=7)
+        self.show_week()
+
+    def on_day_click(self, date):
+        print("Clicked on:", date.strftime("%A, %d-%m-%Y"))
+        sql_date = (str(date.strftime("%A, %d-%m-%Y")).split(',')[1].strip())
+        print(sql_date)
+        print(read_from_db_date(sql_date))
+
 class OtherPage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
-        label = tk.Label(self, text="This is the other page")
+        label = tk.Label(self, text="Weekly Calendar View")
         label.pack(pady=10, padx=10)
+
+        # Create a frame to contain the weekly calendar
+        self.calendar_frame = ttk.Frame(self)
+        self.calendar_frame.pack(pady=10, padx=10)
+
+        # Create the weekly calendar app instance
+        self.weekly_calendar = WeeklyCalendarApp(self.calendar_frame)
 
 class SettingsPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -155,6 +228,7 @@ def set_language(lang):
     _ = lang_translation.gettext
 
 if __name__ == "__main__":
-    set_language('en')
+    set_language(language)
+    print(language)
     app = ScreenTimeApp()
     app.mainloop()
