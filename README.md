@@ -12,8 +12,9 @@ ScreenTime is a Python application that tracks the time spent on each window and
 - The following Python packages:
   - `pywin32`
   - `psutil`
-  - `sqlite3` (built-in with Python)
-  - `tkinter` (built-in with Python)
+  - `sqlite3` (sometimes built-in with Python)
+  - `tkinter` (sometimes built-in with Python)
+  - `matplotlib` (sometimes built-in with Python)
 
 ## Installation
 
@@ -21,9 +22,13 @@ ScreenTime is a Python application that tracks the time spent on each window and
 
    `git clone https://github.com/mazarskov/ScreenTime.git`
 
+2. Navigate to the project directory 
+    
+    `cd ScreenTime`
+
 2. Install the required Python packages:
 
-    `pip install pywin32 psutil`
+    `pip install pywin32 psutil` or by using `pip install -r requirements.txt`
 
 ## Usage
 

@@ -9,7 +9,7 @@ from database.db_commands import add_to_db, read_from_db_date, read_from_db
 from logic.current_time import get_current_time
 import gettext
 import os
-from logic.config import get_language
+from logic.config import get_language, modify_config
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import os
@@ -133,14 +133,14 @@ class HomePage(tk.Frame):
 
     def update_text_area(self):
         self.text_area.config(state=tk.NORMAL)
-        self.text_area.delete(1.0, tk.END)  # Clear the text area
+        self.text_area.delete(1.0, tk.END)
         for key in time_dict:
             if key == "Unknown(Unknown)":
                 continue
             else:
                 self.text_area.insert(tk.END, f'{key}: {time_dict[key]} seconds\n')
         self.text_area.config(state=tk.DISABLED)
-        self.text_area.see(tk.END)  # Scroll to the end of the text area
+        self.text_area.see(tk.END)
 
 class WeeklyCalendar:
     def __init__(self, root):
@@ -178,13 +178,12 @@ class WeeklyCalendar:
         self.details_frame = ttk.Frame(self.root)
         self.details_frame.pack(padx=10, pady=10, fill="x")
         
-        # Label to display the details
         self.details_label = ttk.Label(self.details_frame, text=(_("Click on a date to see details here.")))
         self.details_label.pack(padx=10, pady=10, fill="x")
 
     def create_day_labels(self):
         for label in self.day_labels:
-            label.grid_forget()  # Remove existing labels from the grid
+            label.grid_forget()
 
         self.day_labels = []
         for i, day in enumerate(self.week_days):
@@ -246,27 +245,21 @@ class WeeklyCalendar:
 
     
     def create_plot(self, data):
-        # Calculate total sum of seconds
         total_seconds = sum(entry[1] for entry in data)
 
-        # Calculate percentages
         percentages = [(entry[0], entry[1] / total_seconds * 100) for entry in data]
 
-        # Plot
         labels, percentages = zip(*percentages)
         fig, ax = plt.subplots()
         patches, texts, autotexts = ax.pie(percentages, labels=labels, autopct='%1.1f%%', startangle=140)  
 
-        # Adjust font size of text elements
         for text in texts:
             text.set_fontsize(7)  # Adjust font size of labels
         for autotext in autotexts:
             autotext.set_fontsize(7) 
-        #ax.set_title('Percentage of Total Screen Time by Application')
 
-        # Embed plot in Tkinter
         if hasattr(self, 'plot_canvas'):
-            self.plot_canvas.get_tk_widget().destroy()  # Destroy existing canvas
+            self.plot_canvas.get_tk_widget().destroy()
         self.plot_canvas = FigureCanvasTkAgg(fig, master=self.root)
         self.plot_canvas.draw()
         self.plot_canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
@@ -274,22 +267,41 @@ class OtherPage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
-        label = tk.Label(self, text=(_("Weekly Calendar View")))
+        label = tk.Label(self, text=(_("Weekly Calendar View")), font=("Helvetica", 16))
         label.pack(pady=10, padx=10)
 
-        # Create a frame to contain the weekly calendar
         self.calendar_frame = ttk.Frame(self)
         self.calendar_frame.pack(pady=10, padx=10)
 
-        # Create the weekly calendar app instance
         self.weekly_calendar = WeeklyCalendar(self.calendar_frame)
 
 class SettingsPage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
-        label = tk.Label(self, text="This is the settings page")
+        label = tk.Label(self, text="This is the settings page", font=("Helvetica", 16))
         label.pack(pady=10, padx=10)
+        button = tk.Button(self, text="Switch to Russian", command=self.change_ru)
+        button.pack(pady=15, padx=15)
+        button2 = tk.Button(self, text="Switch to English", command=self.change_en)
+        button2.pack(pady=15, padx=17)
+        label2 = tk.Label(self, text=f'currently selected language: {language}')
+        label2.pack(pady=20, padx=20)
+        label3 = tk.Label(self, text="NOTE! You have to restart the app to change language. Sorry :(")
+        label3.pack(pady=25, padx=25)
+        button3 = tk.Button(self, text="Exit", command=controller.exit_app)
+        button3.pack(pady=35, padx=35)
+
+    def change_lang(self, lang):
+        language = lang
+        modify_config(lang)
+    
+    def change_ru(self):
+        self.change_lang("lang=ru")
+    
+    def change_en(self):
+        self.change_lang("lang=en")
+
 
 class AboutPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -310,18 +322,16 @@ class DatabasePage(tk.Frame):
         self.controller = controller
         label = tk.Label(self, text="Info about the local database", font=("Helvetica", 16))
         label.pack(pady=10, padx=10)
-        # Automatically find database file path
-        database_filename = "screentime.db"  # Replace with your database filename
+        database_filename = "screentime.db"
         database_path = self.find_database_path(database_filename)
 
         if database_path:
             # Retrieve database file information
             creation_time = datetime.fromtimestamp(os.path.getctime(database_path))
             size_bytes = os.path.getsize(database_path)
-            size_kb = size_bytes / 1024  # Convert bytes to kilobytes
+            size_kb = size_bytes / 1024
 
             database_path = os.path.abspath(database_path)
-            # Display database file information
             info_labels = [
                 f"Location: {database_path}",
                 f"Creation Date: {creation_time}",
