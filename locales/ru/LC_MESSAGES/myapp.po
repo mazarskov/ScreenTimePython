@@ -17,18 +17,38 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: E:\coding\ScreenTime\screen_time\testing.py:57
+#: E:\coding\ScreenTime\screen_time\main.py:60
 msgid "Home"
 msgstr "Домашняя страница"
 
-#: E:\coding\ScreenTime\screen_time\testing.py:60
-msgid "Other"
-msgstr "Другое"
+#: E:\coding\ScreenTime\screen_time\main.py:63
+msgid "Report"
+msgstr "Отчёт"
 
-#: E:\coding\ScreenTime\screen_time\testing.py:63
+#: E:\coding\ScreenTime\screen_time\main.py:66
 msgid "Settings"
 msgstr "Настройки"
 
-#: E:\coding\ScreenTime\screen_time\testing.py:114
+#: E:\coding\ScreenTime\screen_time\main.py:66
+msgid "About"
+msgstr "О разработчике"
+
+#: E:\coding\ScreenTime\screen_time\main.py:120
 msgid "Start"
 msgstr "Старт"
+
+#: E:\coding\ScreenTime\screen_time\main.py:123
+msgid "Exit"
+msgstr "Выход"
+
+#: E:\coding\ScreenTime\screen_time\main.py:178
+msgid "Click on a date to see details here."
+msgstr "Выберите дату"
+
+#: E:\coding\ScreenTime\screen_time\main.py:230
+msgid "No data for this day"
+msgstr "На этот день нет данных"
+
+#: E:\coding\ScreenTime\screen_time\main.py:273
+msgid "Weekly Calendar View"
+msgstr "Отчёт за неделю"

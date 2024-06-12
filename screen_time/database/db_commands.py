@@ -53,6 +53,7 @@ def read_from_db():
             modded_row = []
             modded_row.append(row[1])
             modded_row.append(row[2])
+            modded_row.append(row[3])
             final_list.append(modded_row)
 
     except sqlite3.Error as e:
