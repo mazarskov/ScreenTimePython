@@ -1,7 +1,7 @@
 from datetime import datetime
 import sqlite3
-from database import create_connection, create_table, close_connection
-from current_time import get_current_time
+from database.database import create_connection, create_table, close_connection
+from logic.current_time import get_current_time
 
 
 current_date = get_current_time()

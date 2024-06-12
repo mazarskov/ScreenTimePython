@@ -4,12 +4,12 @@ from tkinter import ttk
 from tkinter import scrolledtext
 import threading
 import time
-from winapi import get_focused_window_info, format_data, time_dict, populate_dict
-from db_commands import add_to_db, read_from_db_date
-from current_time import get_current_time
+from logic.winapi import get_focused_window_info, format_data, time_dict, populate_dict
+from database.db_commands import add_to_db, read_from_db_date
+from logic.current_time import get_current_time
 import gettext
 import os
-from config import get_language
+from logic.config import get_language
 
 
 localedir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'locales')
@@ -133,7 +133,7 @@ class HomePage(tk.Frame):
         self.text_area.config(state=tk.DISABLED)
         self.text_area.see(tk.END)  # Scroll to the end of the text area
 
-class WeeklyCalendarApp:
+class WeeklyCalendar:
     def __init__(self, root):
         self.root = root
         self.current_date = datetime.today().date()
@@ -146,29 +146,43 @@ class WeeklyCalendarApp:
         self.calendar_frame.pack(padx=10, pady=10)
 
         self.scrollbar = ttk.Scrollbar(self.calendar_frame, orient="horizontal")
-        self.scrollbar.grid(row=1, column=0, sticky="ew")
+        self.scrollbar.grid(row=1, column=0, columnspan=3, sticky='ew')
 
         self.calendar_canvas = tk.Canvas(self.calendar_frame, xscrollcommand=self.scrollbar.set)
-        self.calendar_canvas.grid(row=0, column=0, sticky="nsew")
+        self.calendar_canvas.grid(row=0, column=0, columnspan=3, sticky="nsew")
 
         self.scrollbar.config(command=self.calendar_canvas.xview)
 
         self.calendar_frame.grid_rowconfigure(0, weight=1)
-        self.calendar_frame.grid_columnconfigure(0, weight=1)
+        self.calendar_frame.grid_columnconfigure(1, weight=1)
 
         self.prev_week_button = ttk.Button(self.calendar_frame, text="◀", command=self.prev_week)
-        self.prev_week_button.grid(row=2, column=0, padx=5, pady=5)
+        self.prev_week_button.grid(row=2, column=0, padx=5, pady=5, sticky="w")
 
         self.next_week_button = ttk.Button(self.calendar_frame, text="▶", command=self.next_week)
-        self.next_week_button.grid(row=2, column=1, padx=5, pady=5)
+        self.next_week_button.grid(row=2, column=2, padx=5, pady=5, sticky="e")
 
         self.week_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        self.day_labels = []
+        self.create_day_labels()
+
+        self.details_frame = ttk.Frame(self.root)
+        self.details_frame.pack(padx=10, pady=10, fill="x")
+        
+        # Label to display the details
+        self.details_label = ttk.Label(self.details_frame, text="Click on a date to see details here.")
+        self.details_label.pack(padx=10, pady=10, fill="x")
+
+    def create_day_labels(self):
+        for label in self.day_labels:
+            label.grid_forget()  # Remove existing labels from the grid
 
         self.day_labels = []
         for i, day in enumerate(self.week_days):
+            date = self.current_date - timedelta(days=self.current_date.weekday()) + timedelta(days=i)
             label = ttk.Label(self.calendar_canvas, text=day, borderwidth=1, relief="solid")
             label.grid(row=0, column=i, sticky="nsew")
-            label.bind("<Button-1>", lambda event, day=self.current_date - timedelta(days=self.current_date.weekday()) + timedelta(days=i): self.on_day_click(day))
+            label.bind("<Button-1>", lambda event, date=date: self.on_day_click(date))
             self.day_labels.append(label)
 
         self.calendar_canvas.update_idletasks()
@@ -180,8 +194,21 @@ class WeeklyCalendarApp:
         start_of_week = self.current_date - timedelta(days=self.current_date.weekday())
         for i, day_label in enumerate(self.day_labels):
             day = start_of_week + timedelta(days=i)
+            marked = self.is_marked(day.strftime("%d-%m-%Y"))
+            #print(day.strftime("%A\n%d-%m-%Y").split(',')[0].strip() + " a")
+            #print(day.strftime("%d-%m-%Y"))
+            if marked:
+                day_label.config(background="red")
+            else:
+                day_label.config(background="SystemButtonFace")
             day_label.config(text=day.strftime("%A\n%d-%m-%Y"))
 
+    def is_marked(self, day):
+        fin = read_from_db_date(day)
+        if fin == []:
+            return False
+        else:
+            return True
     def prev_week(self):
         self.current_date -= timedelta(days=7)
         self.show_week()
@@ -193,9 +220,13 @@ class WeeklyCalendarApp:
     def on_day_click(self, date):
         print("Clicked on:", date.strftime("%A, %d-%m-%Y"))
         sql_date = (str(date.strftime("%A, %d-%m-%Y")).split(',')[1].strip())
+        data = read_from_db_date(sql_date)
+        formatted_data = f"Selected date: {sql_date}\nYour screen time during this day:\n"
+        for app, time in data:
+            formatted_data += f"{app} for {time} seconds\n"
         print(sql_date)
         print(read_from_db_date(sql_date))
-
+        self.details_label.config(text=formatted_data)
 class OtherPage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
@@ -208,7 +239,7 @@ class OtherPage(tk.Frame):
         self.calendar_frame.pack(pady=10, padx=10)
 
         # Create the weekly calendar app instance
-        self.weekly_calendar = WeeklyCalendarApp(self.calendar_frame)
+        self.weekly_calendar = WeeklyCalendar(self.calendar_frame)
 
 class SettingsPage(tk.Frame):
     def __init__(self, parent, controller):

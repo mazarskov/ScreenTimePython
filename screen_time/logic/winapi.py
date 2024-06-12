@@ -2,9 +2,9 @@ import win32gui
 import win32process
 import psutil
 import time
-from db_commands import read_from_db, read_from_db_date
+from database.db_commands import read_from_db, read_from_db_date
 from datetime import datetime
-from current_time import get_current_time
+from logic.current_time import get_current_time
 
 
 current_date = get_current_time()
